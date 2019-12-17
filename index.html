@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>South African Riots</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css"/>
+    <style>
+        html { height:100%;}
+        body {
+            height:100%;
+            padding: 0;
+            margin: 0;
+        }
+
+        #map {
+            width: 100%;
+            margin: 0 auto;
+            height: 95%;
+        }
+.info {
+    z-index: 1000;
+    position: absolute;
+    right: 40%;
+    top: 5%;
+    padding: 6px 8px;
+    font: 14px Arial, Helvetica, sans-serif;
+    text-align: center;
+    background: white;
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+}
+
+.info h1 {
+    font-size: 16px;
+    margin: 0 0 5px;
+    color: #777777;
+}
+
+
+.legend {
+    line-height: 18px;
+    color: #333333;
+    font-family: 'Open Sans', Helvetica, sans-serif;
+    padding: 6px 8px;
+    background: white;
+    background: rgba(255,255,255,0.8);
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    border-radius: 5px;
+}
+
+.legend i {
+    width: 28px;
+    height: 18px;
+    float: left;
+    margin-right: 8px;
+    opacity: 0.7;
+}
+
+
+.legend p {
+    font-size: 12px;
+    line-height: 18px;
+    margin: 0;
+}
+   .info {
+    z-index: 1000;
+    position: absolute;
+    right: 40%;
+    top: 5%;
+    padding: 6px 8px;
+    font: 14px Arial, Helvetica, sans-serif;
+    text-align: center;
+    background: white;
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+}
+
+.info h1 {
+    font-size: 16px;
+    margin: 0 0 5px;
+    color: #777777;
+}
+
+
+.legend {
+    line-height: 18px;
+    color: #333333;
+    font-family: 'Open Sans', Helvetica, sans-serif;
+    padding: 6px 8px;
+    background: white;
+    background: rgba(255,255,255,0.8);
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    border-radius: 5px;
+}
+
+.legend i {
+    width: 28px;
+    height: 18px;
+    float: left;
+    margin-right: 8px;
+    opacity: 0.7;
+}
+
+
+.legend p {
+    font-size: 12px;
+    line-height: 18px;
+    margin: 0;
+} 
+
+.legend .circle {
+  border-radius: 50%;
+  width: 10px;
+  height: 10px;
+  margin-top: 8px;
+}
+    </style>
+</head>
+<body>
+    <!-- Our web map and content will go here -->
+    <script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <div id="map" style="width: 1000px; height: 600px">
+    </div>
+    <script>
+        var map = L.map('map', {center: [-29.600945, 25.421975], zoom: 6});
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+        map.doubleClickZoom.disable();
+
+        // add point marker
+           var myDataPoint = L.marker([-33.928234, 18.429033]).addTo(map);
+myDataPoint.bindPopup("Capetown");
+myDataPoint.bindPopup("<h3>Capetown</h3><p>South Africa<br>Legislative Capital of South Africa and largest city of the Western Cape.</p>");
+   var myDataPoint2 = L.marker([-26.201184, 28.045586]).addTo(map);
+myDataPoint2.bindPopup("Johannesburg");
+myDataPoint2.bindPopup("<h3>Johannesburg</h3><p>South Africa<br>Largest city in South Africa with a population over 5 million.</p>");
+var myDataPoint3 = L.marker([-25.750727, 28.226174]).addTo(map);
+myDataPoint3.bindPopup("Pretoria");
+myDataPoint3.bindPopup("<h3>Pretoria</h3><p>South Africa<br>Administrative capital of South Africa with three universities in the city.</p>");
+  var myDataPoint4 = L.marker([-29.856420, 31.029567]).addTo(map);
+myDataPoint4.bindPopup("Durban");
+myDataPoint4.bindPopup("<h3>Durban</h3><p>South Africa<br>The third most populous city in South Africa after Johannesburg and Capetown.</p>");  
+var myDataPoint5 = L.marker([-33.967322, 25.616097]).addTo(map);
+myDataPoint5.bindPopup("Port Elizabeth");
+myDataPoint5.bindPopup("<h3>Port Elizabeth</h3><p>South Africa<br>Nicknamed 'The Windy City' and is one of the major seaports in South Africa.</p>");
+    //load and add geojson
+                var riotsLayer = null;
+$.getJSON("Riot_Points_By_Group.json",function(data){
+    riotsLayer = L.geoJson(data, {
+        style: styleFunc,
+        pointToLayer: function(feature, latlng){
+            return new L.CircleMarker(latlng, {
+                color: '#800000',
+                fillColor: '#800000',
+                radius: 5,
+                fillOpacity: 0.85
+            });
+        },
+        onEachFeature: function onEachFeatureFunc (feature, layer){
+    layer.on({
+        mouseover: highlightFeature,
+        mouseout: resetHighlight,
+    });
+    layer.bindPopup('Associated Group (if available): '+feature.properties.assoc_acto+'</h1><p>Date: '+feature.properties.event_date+'</p></h2><p> Available Info: '+feature.properties.notes+'</p>');
+}
+    }).addTo(map);
+});
+
+function highlightFeature(e){
+    var layer = e.target;
+
+    layer.setStyle({
+        weight: 5,
+        color: '#800000',
+        dashArray: '',
+        fillOpacity: 0.7
+    });
+    // for different web browsers
+    if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+        layer.bringToFront();
+    }
+}
+    function resetHighlight(e) {
+    riotsLayer.resetStyle(e.target);
+}
+// Set style function that sets fill color property equal to blood lead
+function styleFunc(feature) {
+    return {
+        fillColor: setColorFunc(feature.properties.num_bll_5p),
+        fillOpacity: 0.9,
+        weight: 1,
+        opacity: 1,
+        color: '#800000',
+        dashArray: '3'
+    };
+}
+// Set function for color ramp, you can use a better palette
+function setColorFunc(density){
+    return density > 25 ? '#ff8080' :
+           density > 15 ? '#ff8080' :
+           density > 5 ? '#ff8080' :
+           density > 0 ? '#ff8080' :
+                         '#ff8080';
+};
+
+L.control.scale({position: 'bottomleft'}).addTo(map);
+
+
+        // Create an Empty Popup
+        var popup = L.popup();
+
+        // Write function to set Properties of the Popup
+        function onMapClick(e) {
+            popup
+                .setLatLng(e.latlng)
+                .setContent("You clicked the map at " + e.latlng.toString())
+                .openOn(map);
+        }
+        
+        // Listen for a click event on the Map element
+        map.on('click', onMapClick);
+        // Create Leaflet Control Object for Legend
+var legend = L.control({position: 'bottomright'});
+// Function that runs when legend is added to map
+legend.onAdd = function (map) {
+    // Create Div Element and Populate it with HTML
+    var div = L.DomUtil.create('div', 'legend');            
+    div.innerHTML += '<b>Riots in South Africa</b><br />';
+    div.innerHTML += 'Throughout 2019<br />';
+    div.innerHTML += '<br>';
+    div.innerHTML += '<i class="circle" style="background: #ff8080"></i><p>Location of Riot</p>';
+    
+    // Return the Legend div containing the HTML content
+    return div;
+};
+
+// Add Legend to Map
+legend.addTo(map);
+
+
+        </script>
+</body>
+</html>
